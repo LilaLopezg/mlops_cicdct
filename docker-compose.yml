@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  iris-predictor:
+    build:
+      context: .
+      dockerfile: predictor/Dockerfile
+    image: iris-predictor:latest
+    container_name: iris-predictor
+    environment:
+      # Variables de entorno por defecto (ejemplo Setosa)
+      - SEPAL_LENGTH=5.1
+      - SEPAL_WIDTH=3.5
+      - PETAL_LENGTH=1.4
+      - PETAL_WIDTH=0.2
+    command: python predict_api.py --examples
+    
+  # Servicio para predicción personalizada usando variables de entorno
+  iris-predictor-custom:
+    build:
+      context: .
+      dockerfile: predictor/Dockerfile
+    image: iris-predictor:latest
+    container_name: iris-predictor-custom
+    environment:
+      # Ejemplo Versicolor - cambiar estos valores según necesidad
+      - SEPAL_LENGTH=6.4
+      - SEPAL_WIDTH=3.2
+      - PETAL_LENGTH=4.5
+      - PETAL_WIDTH=1.5
+    command: python predict_api.py --env
+    profiles:
+      - custom
