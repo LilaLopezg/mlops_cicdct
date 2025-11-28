@@ -1,0 +1,80 @@
+[33mcommit 87df0757634953662380adfe720621ee7b4f2aa0[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeatures/final-phase[m[33m)[m
+Author: LilaLopezg <lillopez@utb.edu.co>
+Date:   Fri Nov 28 00:07:56 2025 +0000
+
+    ajustes al dockerfile de las predicciones
+
+[33mcommit 53ac6cc817304cf484a5bfb10b6c6cbad533365a[m
+Author: LilaLopezg <lillopez@utb.edu.co>
+Date:   Fri Nov 28 00:06:46 2025 +0000
+
+    ajustes de docker compose en version 2
+
+[33mcommit 78c9d319730c02005e45b05a710330ba39a01ba1[m
+Author: LilaLopezg <lillopez@utb.edu.co>
+Date:   Fri Nov 28 00:05:34 2025 +0000
+
+    Cambios finales al README
+
+[33mcommit c371a3f5a518393a985dffcd5c106457c37cd701[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m
+Merge: d546638 07e5e79
+Author: LilaLopezg <lillopez@utb.edu.co>
+Date:   Thu Nov 20 16:55:09 2025 -0800
+
+    Merge pull request #3 from LilaLopezg/features/predictor
+    
+    Agregando los archivos de predictor
+
+[33mcommit d5466388a26fe57ba342451400c4f31f67ef5924[m
+Merge: 8383526 b020456
+Author: LilaLopezg <lillopez@utb.edu.co>
+Date:   Thu Nov 20 16:52:48 2025 -0800
+
+    Merge pull request #2 from LilaLopezg/features/training
+    
+    Features/training
+
+[33mcommit 83835267336f442cea58e72d57536bf743a599b1[m
+Merge: 93e5cdb 1be0eca
+Author: LilaLopezg <lillopez@utb.edu.co>
+Date:   Thu Nov 20 16:47:25 2025 -0800
+
+    Merge pull request #1 from LilaLopezg/features/dockerizacion
+    
+    Agregando la dockerizacion
+
+[33mcommit 1be0eca41e4e078e9b5f703de22a3f5f80c33ea6[m[33m ([m[1;31morigin/features/dockerizacion[m[33m)[m
+Author: LilaLopezg <lillopez@utb.edu.co>
+Date:   Thu Nov 20 16:31:52 2025 -0800
+
+    Agregando la dockerizacion
+
+[33mcommit 07e5e79245fb8dfb8e1d534cd11006115987127d[m[33m ([m[1;31morigin/features/predictor[m[33m)[m
+Author: LilaLopezg <lillopez@utb.edu.co>
+Date:   Thu Nov 20 16:27:55 2025 -0800
+
+    Agregando los archivos de predictor
+
+[33mcommit b02045615a3427499526d185f4f5962fe241f54a[m[33m ([m[1;31morigin/features/training[m[33m)[m
+Author: LilaLopezg <lillopez@utb.edu.co>
+Date:   Thu Nov 20 16:25:01 2025 -0800
+
+    Agregando el .dockerignore
+
+[33mcommit c4c8c248b05e80b65105cf82447780dbc4cddc45[m
+Author: LilaLopezg <lillopez@utb.edu.co>
+Date:   Thu Nov 20 16:21:49 2025 -0800
+
+    Agregando los archivos de la carpeta training
+
+[33mcommit 93e5cdb58ebc7e3b186ef28d47f3009c818a4a01[m
+Author: LilaLopezg <lillopez@utb.edu.co>
+Date:   Thu Nov 20 15:55:05 2025 -0800
+
+    Cambios README
+
+[33mcommit cbd0fd93c8b060920bd2abee68d11776a51b0a75[m
+Author: LilaLopezg <lillopez@utb.edu.co>
+Date:   Thu Nov 20 15:51:11 2025 -0800
+
+    Agregando .gitignore
