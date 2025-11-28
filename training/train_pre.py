@@ -18,11 +18,16 @@ from imblearn.combine import SMOTETomek, SMOTEENN
 from imblearn.under_sampling import TomekLinks
 
 
-def load_data(filepath="/Users/lila/Documents/mlops_cicdct/data/train.csv"):
+def load_data(filepath=None):
     """Carga el dataset de consumo de alcohol"""
-    print("Cargando dataset de consumo de alcohol...")
-    
+
+    if filepath is None:
+        filepath = "/app/data/train.csv"
+
+    print(f"Cargando dataset desde: {filepath}")
+
     df = pd.read_csv(filepath, sep=";")
+
     
     # Separar variables predictoras y target
     X = df.drop("Consumo", axis=1).select_dtypes(include=["number"])

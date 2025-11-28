@@ -1,29 +1,38 @@
 #!/bin/bash
-# Script para construir la imagen Docker del predictor
+# Script para construir la imagen Docker del predictor de consumo de alcohol
 
 set -e
 
-echo "🏗️  Construyendo imagen Docker del predictor Iris..."
+echo "🏗️  Construyendo imagen Docker del predictor de Consumo de Alcohol..."
 
-# Construir desde la raíz del proyecto para acceder a la carpeta models
+# Movernos a la raíz del proyecto
 cd "$(dirname "$0")/.."
 
-# Verificar que existe el modelo
-if [ ! -f "models/iris_model_latest.pkl" ]; then
-    echo "❌ Error: No se encontró el modelo iris_model_latest.pkl en la carpeta models/"
-    echo "   Ejecuta primero el entrenamiento: cd training && python train.py"
+# Ruta donde se espera que esté el modelo ya entrenado
+MODEL_SRC_PATH="training/models/consumo_model_latest.pkl"
+MODEL_DEST_PATH="predictor/models/consumo_model_latest.pkl"
+
+# Verificar que existe el modelo entrenado
+if [ ! -f "$MODEL_SRC_PATH" ]; then
+    echo "❌ Error: No se encontró el modelo en: $MODEL_SRC_PATH"
+    echo "   Asegúrate de haber ejecutado el entrenamiento:"
+    echo "     python training/train_advanced.py --data ... --out training/models"
     exit 1
 fi
 
-mkdir -p predictor/models && cp models/iris_model_latest.pkl predictor/models/
+# Copiar el modelo al predictor
+mkdir -p predictor/models
+cp "$MODEL_SRC_PATH" "$MODEL_DEST_PATH"
 
-# Construir imagen
-docker build -f predictor/Dockerfile -t iris-predictor:latest .
+# Construir imagen Docker
+docker build -f predictor/Dockerfile -t consumo-predictor:latest .
 
-echo "✅ Imagen construida exitosamente: iris-predictor:latest"
+echo "✅ Imagen construida exitosamente: consumo-predictor:latest"
 echo ""
 echo "Para ejecutar el contenedor:"
 echo "  predictor/run_predictor.sh"
 echo ""
-echo "Para hacer predicciones personalizadas:"
-echo "  docker run --rm iris-predictor:latest python predict_api.py --sepal_length 6.0 --sepal_width 3.0 --petal_length 4.5 --petal_width 1.5"
+echo "Para hacer predicciones manualmente dentro del contenedor:"
+echo "  docker run --rm consumo-predictor:latest python predict.py \\"
+echo "       --age 21 --gender 1 --parent_alcohol 0 --academic_semester 4"
+
