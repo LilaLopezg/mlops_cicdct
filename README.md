@@ -23,6 +23,8 @@ mlops_cicdct/
 └── README.md         # Este archivo
 ```
 ```bash
+#Inicio en un servidor SSH
+ssh ubuntu@XXX.XXX.XX.XX
 #Creo el entorno virtual - mlops
 python3 --version
 which python3
@@ -48,6 +50,7 @@ Para entrenar un nuevo modelo:
 ```bash
 cd training
 python train_pre.py
+python training/train_advanced.py   --data /home/ubuntu/mlops_cicdct/data/train.csv   --out /home/ubuntu/mlops_cicdct/training/models   --n_jobs 4   --optuna_trials 20 #Entrenamiento optimizados de varios modelos.
 ```
 
 Este script:
@@ -65,13 +68,17 @@ Este script:
 ```bash
 cd training
 #!/bin/bash
-docker run -it  --platform linux/amd64 python:3.11-slim /bin/bash #Ejecuto la imagen manualmente del contenedor de python, sobre una arquitectura de donde amd.
+./build_and_runm.sh
 
 echo "🐳 Construyendo imagen Docker para entrenamiento de Consumo de Alcohol..."
-docker build -t contenedor_entrenamiento_consumo_alcohol . # Se construye la imagen
+docker build -t alcohol_training . # Se construye la imagen
+docker build --no-cache -t alcohol_training . #Sin cache
 
 echo "🚀 Ejecutando contenedor..."
-docker run --rm consumo_alcohol_entrenamiento
+docker run --rm \
+  -v "/home/ubuntu/mlops_cicdct/training/data:/app/data" \
+  -v "/home/ubuntu/mlops_cicdct/training/models:/app/models" \
+  alcohol_training
 ```
 
 Este script:
@@ -84,73 +91,97 @@ Este script:
 #### Opción A: Python Local
 ```bash
 cd training
-python predict.py --sepal_length 5.1 --sepal_width 3.5 --petal_length 1.4 --petal_width 0.2
+python predict.py \
+  --age 21 \
+  --gender 1 \
+  --parent_alcohol 0 \
+  --academic_semester 4 \
+  --model_path /home/ubuntu/mlops_cicdct/training/models/consumo_model_latest.pkl
+
 ```
 
 #### Opción B: Docker Predictor (Recomendado) 🐳
 
 **1. Construir imagen del predictor:**
 ```bash
+docker build -t alcohol-predictor .
 ./predictor/build_predictor.sh
+docker build -f predictor/Dockerfile -t consumo-predictor:latest predictor/
+
 ```
 
 **2. Ejecutar ejemplos de predicción:**
+Para ejecutar los ejemplos con ./predictor/run_predictor.sh, hay que agregarle a Dockerfile COPY predictor/
 ```bash
+docker run --rm alcohol-predictor
 ./predictor/run_predictor.sh
+docker run --rm consumo-predictor:latest
 ```
 
 **3. Predicción personalizada:**
 ```bash
-docker run --rm consumo-predictor:latest python predict_api.py --sepal_length 6.0 --sepal_width 3.0 --petal_length 4.5 --petal_width 1.5
+docker run --rm alcohol-predictor \
+    python predict_api.py --age 22 --gender 1 --parent_alcohol 1 --academic_semester 4
 ```
 
 **4. Con variables de entorno:**
 ```bash
-docker run --rm -e SEPAL_LENGTH=6.4 -e SEPAL_WIDTH=3.2 -e PETAL_LENGTH=4.5 -e PETAL_WIDTH=1.5 consumo-predictor:latest python predict_api.py --env
+docker run --rm \
+    -e AGE=23 \
+    -e GENDER=0 \
+    -e PARENT_ALCOHOL=1 \
+    -e ACADEMIC_SEMESTER=6 \
+    alcohol-predictor \
+    python predict_api.py --env
 ```
 
 **5. Con Docker Compose:**
+Instalación docker-compose
+- sudo apt update
+- sudo apt-get install docker-compose-plugin  ** Se instalo la version 2 de docker compose**
+- docker compose version
+- docker compose up --build 
 ```bash
 # Ejecutar ejemplos
-docker-compose up iris-predictor
+docker compose up consumo-predictor
 
 # Predicción personalizada (editar variables en docker-compose.yml)
-docker-compose --profile custom up iris-predictor-custom
+docker compose --profile custom up consumo-predictor-custom
 ```
 
 ### 4. Ejemplos de Predicción
 
-**Setosa (esperado):**
+**Consumo de alcohol (edad):**
 ```bash
-python predict.py --sepal_length 5.1 --sepal_width 3.5 --petal_length 1.4 --petal_width 0.2
+python predict.py --age 22 --gender 1 --parent_alcohol 1 --academic_semester 4
 ```
 
-**Versicolor (esperado):**
+**Consumo de alcohol (sexo):**
 ```bash
-python predict.py --sepal_length 6.4 --sepal_width 3.2 --petal_length 4.5 --petal_width 1.5
+python predict.py --age 19 --gender 0 --parent_alcohol 0 --academic_semester 6
+```
+**Consumo de alcohol (familiares borrachos):**
+```bash
+python predict.py --age 24 --gender 1 --parent_alcohol 1 --academic_semester 8
 ```
 
-**Virginica (esperado):**
-```bash
-python predict.py --sepal_length 6.3 --sepal_width 3.3 --petal_length 6.0 --petal_width 2.5
-```
+## Dataset Consumo de alcohol de estudiantes de la Universidad de Córdoba - 2022-II
 
-## Dataset Iris
+El dataset consumo de alcohol en estudiantes universitarios contiene 2971 muestras con 72 variables:
+- **Edad**: 2971 muestras
+- **Sexo**: 2971 muestras
+- **Familiares_borracho**: 2971 muestras 
+- **Semestre_academico**: 2971 muestras
 
-El dataset Iris contiene 150 muestras de tres especies de flores:
-- **Setosa**: 50 muestras
-- **Versicolor**: 50 muestras  
-- **Virginica**: 50 muestras
-
-Cada muestra tiene 4 características:
-- Longitud del sépalo (sepal length)
-- Ancho del sépalo (sepal width)
-- Longitud del pétalo (petal length)
-- Ancho del pétalo (petal width)
+Cada muestra tiene 2971 características:
+- Edad estudientes de los programas academicos.
+- Sexo biologico de los estudientes
+- Familiares que se  borrachos e influyen en los estudientes 
+- Semestre academicos de los estudiantes universitarios, entre otras variables.
 
 ## Modelo
 
-- **Algoritmo**: Random Forest Classifier
+- **Algoritmo**: Random Forest Classifier, 
 - **Características**: Escalado estándar aplicado
 - **Evaluación**: División 80/20 train/test con estratificación
 - **Formato**: Modelo guardado en pickle con metadatos
@@ -172,7 +203,7 @@ Posteriormente, instalo Docker en el servidor
   https://download.docker.com/linux/ubuntu \
   $(lsb_release -cs) stable" | \
   sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-- sudo apt-get update  
+- sudo apt-get update
 - sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 3. Permitir Docker sin sudo
 - sudo usermod -aG docker $USERexi
@@ -180,7 +211,7 @@ Cerrar sesión SSH y volver a entrar
 
 ### Prerrequisitos
 - Docker instalado y ejecutándose
-- Modelo entrenado (`consumo_model_smoteenn_latest.pkl` en `models/`)
+- Modelo entrenado (`consumo_model_latest.pkl` en `models/`)
 
 ### Predictor Docker
 
@@ -193,56 +224,58 @@ Cerrar sesión SSH y volver a entrar
 ./predictor/run_predictor.sh
 
 # 3. Docker Compose
-docker-compose up iris-predictor # Cambiar a los datos consumo de alcohol
-```
+docker-compose up consumo-predictor # Cambiar a los datos consumo de alcohol
+``
 
 #### Comandos Manuales
 
 **Construir imagen:**
 ```bash
-docker build -f predictor/Dockerfile -t iris-predictor:latest .
+docker build -f predictor/Dockerfile -t consumo-predictor:latest .
 ```
 
 **Ejecutar ejemplos predefinidos:**
 ```bash
-docker run --rm iris-predictor:latest
+docker run --rm consumo-predictor:latest
 ```
 
 **Predicción personalizada:**
 ```bash
-docker run --rm iris-predictor:latest python predict_api.py \
-    --sepal_length 6.0 --sepal_width 3.0 --petal_length 4.5 --petal_width 1.5
+docker run --rm alcohol-predictor \
+    python predict_api.py --age 22 --gender 1 --parent_alcohol 1 --academic_semester 4
 ```
 
 **Con variables de entorno:**
 ```bash
 docker run --rm \
-    -e SEPAL_LENGTH=6.4 \
-    -e SEPAL_WIDTH=3.2 \
-    -e PETAL_LENGTH=4.5 \
-    -e PETAL_WIDTH=1.5 \
-    iris-predictor:latest python predict_api.py --env
+    -e AGE=23 \
+    -e GENDER=0 \
+    -e PARENT_ALCOHOL=1 \
+    -e ACADEMIC_SEMESTER=6 \
+    alcohol-predictor \
+    python predict_api.py --env
 ```
 
 **Salida en JSON:**
 ```bash
-docker run --rm iris-predictor:latest python predict_api.py \
-    --sepal_length 5.1 --sepal_width 3.5 --petal_length 1.4 --petal_width 0.2 --json
+docker run --rm alcohol-predictor:latest python predict_api.py \
+    --age 22 --gender 1 --parent_alcohol 1 --academic_semester 4 --json
 ```
 
 ### Características del Predictor Docker
 - **Base**: Python 3.13-slim
-- **Modelo**: Pre-cargado desde `models/iris_model_latest.pkl`
+- **Modelo**: Pre-cargado desde `models/consumo_model_latest.pkl`
 - **API mejorada**: Múltiples opciones de entrada y salida
 - **Variables de entorno**: Configuración flexible
-- **Ejemplos integrados**: Demonstración automática de las 3 especies
+- **Ejemplos integrados**: Demonstración automática de las muestras del consumo de alcohol
 - **Salida JSON**: Para integración con APIs
 
 ## Archivos del Modelo
 
 El modelo se guarda en dos archivos:
-- `models/iris_model_latest.pkl`: Versión más reciente
-- `models/iris_model_YYYYMMDD_HHMMSS.pkl`: Versión con timestamp
+- `models/consumo_model_latest.pkl`: Versión más reciente
+- `models/best_consumo_model_20251121_170743.pkl`: Versión más reciente
+- `models/consumo_model_YYYYMMDD_HHMMSS.pkl`: Versión con timestamp
 
 Cada archivo pickle contiene:
 - Modelo entrenado
